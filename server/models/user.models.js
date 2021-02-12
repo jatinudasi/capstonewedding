@@ -33,9 +33,13 @@ const userschema = new Schema({
 
 userschema.pre('save', async function (next) {
     try {
+      if(this.isModified("password")) //this is compulsary
+      {
+      console.log("save function triggred");
       const salt = await bcrypt.genSalt(10)
       const hashedpassword = await bcrypt.hash(this.password, salt)
       this.password = hashedpassword;
+      }
   
       next();
     } catch (error) {

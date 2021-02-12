@@ -86,6 +86,17 @@ try {
     
 })
 
+router.patch('/updatedetail',async(req,res,next)=>{
+  console.log("this 1 is triggred")
+let {email,newemail} =req.body;
+
+const result= await User.findOne({ email:email});
+if(!result) res.send("enter valid email");
+result.email =newemail
+const result2 = await result.save();
+res.send(result2);
+
+});
 module.exports = router;
 
 
