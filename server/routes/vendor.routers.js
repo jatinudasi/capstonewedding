@@ -2,7 +2,7 @@ const express = require("express");
 const validator = require("validator");
 const router = express.Router();
 
-const User = require("./../models/user.models");
+const Vendor = require("./../models/vendor.models");
 const { signaccesstoken } = require("./../helpers/jwt.helpers");
 
 //creating a new user
@@ -10,18 +10,18 @@ router.post("/signup", async (req, res, next) => {
 	// res.send("good");
 	console.log(req.body);
 
-	let { email, password, mobile } = req.body;
+	let { email, password, mobile, business, type, info, state, city, location, adv_payment } = req.body;
 	if (!email || !password) res.json({ error: "please enter emailid and password" });
 
 	if (!validator.isEmail(email)) res.json({ error: "enter a valid email" });
 	try {
-		let duplicateemail = await User.findOne({ email: email });
-		let phonenumber = await User.findOne({ mobile: mobile });
-		if (duplicateemail || phonenumber) res.json({ error: "please enter unique email and phone number" });
+		let duplicateemail = await Vendor.findOne({ email: email });
+		let phonenumber = await Vendor.findOne({ mobile: mobile });
+		if (duplicateemail || phonenumber) res.json({ error: "please enter unique email or phone number" });
 
-		let user = await new User({ email, password, mobile });
+		let user = await new Vendor({ email, password, mobile, business, type, info, state, city, location, adv_payment });
 		let saveduser = await user.save();
-		const token = await signaccesstoken(saveduser.id, saveduser.email);
+		const token = await signaccesstoken(saveduser.id, saveduser.email, saveduser.role);
 
 		res.send({ token: token, saveduser: saveduser });
 	} catch (error) {
@@ -35,13 +35,13 @@ router.post("/signin", async (req, res, next) => {
 	if (!email || !password) res.json({ error: "please enter emailid and password" });
 
 	try {
-		let userexist = await User.findOne({ email: email });
+		let userexist = await Vendor.findOne({ email: email });
 		if (!userexist) res.json({ error: "enter valid email password" });
 
 		let result = await userexist.isvalid(password);
 		if (!result) res.json({ error: "enter valid email password" });
 
-		const token = await signaccesstoken(userexist.id, userexist.email);
+		const token = await signaccesstoken(userexist.id, userexist.email, userexist.role);
 
 		res.send({ success: token });
 	} catch (error) {
@@ -56,8 +56,8 @@ router.patch("/updatepassword", async (req, res, next) => {
 	}
 
 	try {
-		let userexist = await User.findOne({ email: email });
-		if (!userexist) res.json({ error: "enter valid email password" });
+		let userexist = await Vendor.findOne({ email: email });
+		if (!userexist) res.json({ error: "enter valid email" });
 
 		let result = await userexist.isvalid(password);
 
@@ -75,7 +75,7 @@ router.patch("/updatedetail", async (req, res, next) => {
 	console.log("this 1 is triggred");
 	let { email, newemail } = req.body;
 
-	const result = await User.findOne({ email: email });
+	const result = await Vendor.findOne({ email: email });
 	if (!result) res.send("enter valid email");
 	result.email = newemail;
 	const result2 = await result.save();

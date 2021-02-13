@@ -19,11 +19,6 @@ const userschema = new Schema({
     minLength: 5
    
   }, 
-  role: {
-    type: String,
-    default: "customer",
-    enum: ['customer','vendor'] //enum is for validating that the value provided will be of below three array string
-  },
   mobile:{
       type:String,
       trim:true,
