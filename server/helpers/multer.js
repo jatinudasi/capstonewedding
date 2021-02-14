@@ -1,21 +1,19 @@
-var multer = require('multer');
+var multer = require("multer");
 //multer.diskStorage() creates a storage space for storing files.
 var storage = multer.diskStorage({
-destination:function(req, file,cb){
-// if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
-cb(null, 'uploads/');
-// }else{
-// cb({message: 'this file is neither a video or image file'}, false)
-// }
-},
-filename: function(req, file, cb){
-cb(null, file.originalname);
-}
-})
-var upload = multer({storage:storage});
-module.exports = {upload};
-
-
+	destination: function (req, file, cb) {
+		// if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+		cb(null, "uploads/");
+		// }else{
+		// cb({message: 'this file is neither a video or image file'}, false)
+		// }
+	},
+	filename: function (req, file, cb) {
+		cb(null, `${Date.now()}.jpg`);
+	},
+});
+var upload = multer({ storage: storage });
+module.exports = { upload };
 
 // const multer = require('multer')
 // const  Datauri =require('datauri');
@@ -25,8 +23,6 @@ module.exports = {upload};
 // const dUri = new Datauri();
 // const dataUri = req => dUri.format(path.extname(req.file.originalname).toString(), req.file.buffer);
 // module.exports = {multerUploads,dataUri};
-
-
 
 // import multer from 'multer';
 // import Datauri from 'datauri';

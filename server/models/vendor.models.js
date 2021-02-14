@@ -13,7 +13,18 @@ export const VENDOR_TYPES = {
 	MUSIC_DANCE: "music_dance",
 };
 
-const vendorchema = new Schema({
+export const reviewSchema = new Schema(
+	{
+		name: { type: String, required: true },
+		rating: { type: Number, default: 0 },
+		comment: { type: String, required: true },
+	},
+	{
+		timestamps: true,
+	}
+);
+
+const vendorschema = new Schema({
 	email: {
 		type: String,
 		trim: true,
@@ -66,9 +77,12 @@ const vendorchema = new Schema({
 		trim: true,
 		required: true,
 	},
+	rating: { type: Number, default: 0, required: true },
+	reviews: [reviewSchema],
+	image: { type: String },
 });
 
-vendorchema.pre("save", async function (next) {
+vendorschema.pre("save", async function (next) {
 	try {
 		if (this.isModified("password")) {
 			//this is compulsary
@@ -84,7 +98,7 @@ vendorchema.pre("save", async function (next) {
 	}
 });
 //this function has to run manually by calling it
-vendorchema.methods.isvalid = async function (password) {
+vendorschema.methods.isvalid = async function (password) {
 	try {
 		return await bcrypt.compare(password, this.password); //returns boolean
 	} catch (error) {
@@ -93,5 +107,5 @@ vendorchema.methods.isvalid = async function (password) {
 	return 0;
 };
 
-const Vendor = model("Vendor", vendorchema);
+const Vendor = model("Vendor", vendorschema);
 module.exports = Vendor;

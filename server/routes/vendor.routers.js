@@ -21,7 +21,7 @@ router.post("/signup", async (req, res, next) => {
 
 		let user = await new Vendor({ email, password, mobile, business, type, info, state, city, location, adv_payment });
 		let saveduser = await user.save();
-		const token = await signaccesstoken(saveduser.id, saveduser.email, saveduser.role);
+		const token = await signaccesstoken(saveduser.id, saveduser.email);
 
 		res.send({ token: token, saveduser: saveduser });
 	} catch (error) {
@@ -41,7 +41,7 @@ router.post("/signin", async (req, res, next) => {
 		let result = await userexist.isvalid(password);
 		if (!result) res.json({ error: "enter valid email password" });
 
-		const token = await signaccesstoken(userexist.id, userexist.email, userexist.role);
+		const token = await signaccesstoken(userexist.id, userexist.email);
 
 		res.send({ success: token });
 	} catch (error) {
@@ -81,4 +81,5 @@ router.patch("/updatedetail", async (req, res, next) => {
 	const result2 = await result.save();
 	res.send(result2);
 });
+
 module.exports = router;
