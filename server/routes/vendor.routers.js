@@ -102,6 +102,5 @@ router.post("/add", upload.single("profile_img"), configcloud, signaccesstoken, 
 	} catch (error) {
 		next(error);
 	}
-});  	
-
+});
 module.exports = router;
