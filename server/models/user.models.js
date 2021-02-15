@@ -17,8 +17,7 @@ const userschema = new Schema({
     trim:true,
     required:true,
     minLength: 5
-   
-  }, 
+   }, 
   mobile:{
       type:String,
       trim:true,
