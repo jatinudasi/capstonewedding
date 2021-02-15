@@ -4,6 +4,8 @@ const router = express.Router();
 
 const Vendor = require("./../models/vendor.models");
 const { signaccesstoken } = require("./../helpers/jwt.helpers");
+const { configcloud, uploadtocloud } = require("../helpers/cloudinary");
+const { upload } = require("../helpers/multer");
 
 //creating a new user
 router.post("/signup", async (req, res, next) => {
@@ -19,8 +21,8 @@ router.post("/signup", async (req, res, next) => {
 		let phonenumber = await Vendor.findOne({ mobile: mobile });
 		if (duplicateemail || phonenumber) res.json({ error: "please enter unique email or phone number" });
 
-		let user = await new Vendor({ email, password, mobile, business, type, info, state, city, location, adv_payment });
-		let saveduser = await user.save();
+		let vendor = await new Vendor({ email, password, mobile, business, type, info, state, city, location, adv_payment });
+		let saveduser = await vendor.save();
 		const token = await signaccesstoken(saveduser.id, saveduser.email);
 
 		res.send({ token: token, saveduser: saveduser });
@@ -81,5 +83,25 @@ router.patch("/updatedetail", async (req, res, next) => {
 	const result2 = await result.save();
 	res.send(result2);
 });
+
+router.post("/add", upload.single("profile_img"), configcloud, signaccesstoken, async (req, res, next) => {
+	try {
+		if (!req.file) {
+			res.json({ error: "plese enter add files" });
+		}
+		const path = req.file.path;
+		const resulturl = await uploadtocloud(path);
+		req.body.image = resulturl.url;
+		const { image } = req.body;
+		let profile_pic = new Vendor({ image: image });
+		let saveduser = await profile_pic.save();
+		const token = await signaccesstoken(saveduser.id, saveduser.email, saveduser.mobile);
+
+		res.send("Good");
+
+	} catch (error) {
+		next(error);
+	}
+});  	
 
 module.exports = router;

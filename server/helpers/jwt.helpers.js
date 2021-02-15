@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = {
-	signaccesstoken: async (userid, useremail, role) => {
+	signaccesstoken: async (userid, useremail, usermobile) => {
 		return new Promise((resolve, reject) => {
 			const payload = {
 				email: useremail,
 				id: userid,
+				mobile: usermobile,
 			};
 			const secret = process.env.jwtkey;
 			const optains = { expiresIn: "1h" };
