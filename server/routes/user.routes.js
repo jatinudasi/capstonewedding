@@ -5,6 +5,7 @@ const router = express.Router();
 const User = require("./../models/user.models");
 const { signaccesstoken } = require("./../helpers/jwt.helpers");
 
+
 //creating a new user
 router.post("/signup", async (req, res, next) => {
 	try {
@@ -24,7 +25,7 @@ router.post("/signup", async (req, res, next) => {
 		let user = await new User({ email, password, mobile });
 		 await user.save();
 		const token = await signaccesstoken(user.id,user.email);
-
+		
 		res.status(201).send({ token: token, saveduser:user });
 	} catch (error) {
 		next(error);
@@ -48,7 +49,7 @@ router.post("/signin", async (req, res, next) => {
 		let result = await userexist.isvalid(password);
 		if (!result) throw new Error("enter valid email password");
 
-		const token = await signaccesstoken(userexist.id, userexist.email);
+		const token = await signaccesstoken(userexist.id, userexist.email, saveduser.mobile);
 
 		res.status(200).send({success: token });
 	} catch (error) {
@@ -88,5 +89,7 @@ router.patch("/updatedetail", async (req, res, next) => {
 	const result2 = await result.save();
 	res.send(result2);
 });
+
+
 
 module.exports = router;
