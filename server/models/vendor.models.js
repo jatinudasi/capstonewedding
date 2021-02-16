@@ -4,20 +4,20 @@ const bcrypt = require("bcryptjs");
 
 const { Schema, model } = mongoose;
 
-export const VENDOR_TYPES = {
-	PHOTOGRAPHER: "photographer",
-	MAKEUP: "makeup",
-	MEHNDI: "mehndi",
-	PLANNING_DECOR: "planning_decor",
-	FOOD: "food",
-	MUSIC_DANCE: "music_dance",
-};
+//  const VENDOR_TYPES = {
+// 	PHOTOGRAPHER: "photographer",
+// 	MAKEUP: "makeup",
+// 	MEHNDI: "mehndi",
+// 	PLANNING_DECOR: "planning_decor",
+// 	FOOD: "food",
+// 	MUSIC_DANCE: "music_dance",
+// };
 
-export const reviewSchema = new Schema(
+ const reviewSchema = new Schema(
 	{
-		name: { type: String, required: true },
-		rating: { type: Number, default: 0 },
-		comment: { type: String, required: true },
+		name:{ type: String, required: true },
+		rating:{ type: Number, default: 0 },
+		comment:{ type: String, required: true },
 	},
 	{
 		timestamps: true,
@@ -51,6 +51,8 @@ const vendorschema = new Schema({
 	type: {
 		type: String,
 		required: true,
+		enum:["photographer","makeup","mehndi","planning_decor","food","music_dance"]
+
 	},
 	info: {
 		type: String,

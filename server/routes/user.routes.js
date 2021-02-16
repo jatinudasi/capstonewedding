@@ -4,47 +4,52 @@ const router = express.Router();
 
 const User = require("./../models/user.models");
 const { signaccesstoken } = require("./../helpers/jwt.helpers");
-
+const Vendor = require("../models/vendor.models");
 
 //creating a new user
 router.post("/signup", async (req, res, next) => {
-	// res.send("good");
-	console.log(req.body);
-
-	let { email, password, mobile } = req.body;
-	if (!email || !password) res.json({ error: "please enter emailid and password" });
-
-	if (!validator.isEmail(email)) res.json({ error: "enter a valid email" });
 	try {
+		console.log(req.body);
+
+		let { email, password, mobile } = req.body;
+
+		if (!email || !password || !mobile) throw new Error("please enter emailid and password");
+		if (!validator.isEmail(email) || !validator.isMobilePhone(mobile, "en-IN")) throw new Error("enter a valid email and valid phone number");
+
 		let duplicateemail = await User.findOne({ email: email });
 		let phonenumber = await User.findOne({ mobile: mobile });
-		if (duplicateemail || phonenumber) res.json({ error: "please enter unique email and phone number" });
+
+		if (duplicateemail || phonenumber) throw new Error("please enter unique email and phone number");
 
 		let user = await new User({ email, password, mobile });
-		let saveduser = await user.save();
-		const token = await signaccesstoken(saveduser.id, saveduser.email, saveduser.mobile);
+		await user.save();
+		const token = await signaccesstoken(user.id, user.email);
 
-		res.send({ token: token, saveduser: saveduser });
+		res.status(201).send({ token: token, saveduser: user });
 	} catch (error) {
 		next(error);
 	}
 });
+
 //existing user to signin
 router.post("/signin", async (req, res, next) => {
 	// res.send("good");
-	let { email, password } = req.body;
-	if (!email || !password) res.json({ error: "please enter emailid and password" });
-
 	try {
-		let userexist = await User.findOne({ email: email });
-		if (!userexist) res.json({ error: "enter valid email password" });
+		let { email, password } = req.body;
+		if (!email || !password) throw new Error("please enter emailid and password");
 
+		let usersearchbyemail = await User.findOne({ email: email });
+		let usersearchbymobile = await User.findOne({ mobile: email });
+		//user can login by both email and phone number
+		if (!usersearchbyemail && !usersearchbymobile) throw new Error("enter valid email password");
+
+		let userexist = usersearchbyemail || usersearchbymobile;
 		let result = await userexist.isvalid(password);
-		if (!result) res.json({ error: "enter valid email password" });
+		if (!result) throw new Error("enter valid email password");
 
 		const token = await signaccesstoken(userexist.id, userexist.email, saveduser.mobile);
 
-		res.send({ success: token });
+		res.status(200).send({ success: token });
 	} catch (error) {
 		next(error);
 	}
@@ -83,6 +88,25 @@ router.patch("/updatedetail", async (req, res, next) => {
 	res.send(result2);
 });
 
-
+router.post("/:id/reviews", async (req, res) => {
+	const vendor = await Vendor.findById(req.params.id);
+	if (vendor) {
+		const review = {
+			name: req.body.name,
+			rating: Number(req.body.rating),
+			comment: req.body.comment,
+		};
+		vendor.reviews.push(review);
+		vendor.numReviews = vendor.reviews.length;
+		vendor.rating = vendor.reviews.reduce((a, c) => c.rating + a, 0) / vendor.reviews.length;
+		const updatedvendor = await vendor.save();
+		res.status(201).send({
+			data: updatedvendor.reviews[updatedvendor.reviews.length - 1],
+			message: "Review saved successfully.",
+		});
+	} else {
+		res.status(404).send({ message: "vendor Not Found" });
+	}
+});
 
 module.exports = router;

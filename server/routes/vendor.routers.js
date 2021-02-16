@@ -10,22 +10,24 @@ const { upload } = require("../helpers/multer");
 //creating a new user
 router.post("/signup", async (req, res, next) => {
 	// res.send("good");
+	try {
 	console.log(req.body);
 
 	let { email, password, mobile, business, type, info, state, city, location, adv_payment } = req.body;
-	if (!email || !password) res.json({ error: "please enter emailid and password" });
+	if (!email || !password || !mobile) throw new Error("please enter emailid and password and mobile");
 
-	if (!validator.isEmail(email)) res.json({ error: "enter a valid email" });
-	try {
-		let duplicateemail = await Vendor.findOne({ email: email });
+	if (!validator.isEmail(email) || !validator.isMobilePhone(mobile,"en-IN")) throw new Error("enter a valid email and mobile number");
+	
+		let duplicateemail = await Vendor.findOne({ email: email});
 		let phonenumber = await Vendor.findOne({ mobile: mobile });
-		if (duplicateemail || phonenumber) res.json({ error: "please enter unique email or phone number" });
+		if (duplicateemail || phonenumber) throw new Error("please enter unique email or phone number");
 
 		let vendor = await new Vendor({ email, password, mobile, business, type, info, state, city, location, adv_payment });
 		let saveduser = await vendor.save();
 		const token = await signaccesstoken(saveduser.id, saveduser.email);
 
-		res.send({ token: token, saveduser: saveduser });
+		res.status(201).send({ token: token, saveduser: saveduser });
+
 	} catch (error) {
 		next(error);
 	}
@@ -37,15 +39,17 @@ router.post("/signin", async (req, res, next) => {
 	if (!email || !password) res.json({ error: "please enter emailid and password" });
 
 	try {
-		let userexist = await Vendor.findOne({ email: email });
-		if (!userexist) res.json({ error: "enter valid email password" });
+		let usersearchbyemail = await  Vendor.findOne({ email: email});
+		let usersearchbymobile = await Vendor.findOne({mobile:email}); 
 
+		if (!usersearchbyemail && !usersearchbymobile) throw new Error("enter valid email password");
+
+		let userexist = usersearchbyemail || usersearchbymobile;
 		let result = await userexist.isvalid(password);
-		if (!result) res.json({ error: "enter valid email password" });
+		if (!result) throw new Error("enter valid email password");
 
 		const token = await signaccesstoken(userexist.id, userexist.email);
-
-		res.send({ success: token });
+		res.status(200).send({ success: token });
 	} catch (error) {
 		next(error);
 	}
