@@ -16,7 +16,7 @@ router.post("/signup", async (req, res, next) => {
 	let { email, password, mobile, business, type, info, state, city, location, adv_payment } = req.body;
 	if (!email || !password || !mobile) throw new Error("please enter emailid and password and mobile");
 
-	if (!validator.isEmail(email) || !validator.isMobilePhone(mobile,"en-IN")) throw new Error("enter a valid email");
+	if (!validator.isEmail(email) || !validator.isMobilePhone(mobile,"en-IN")) throw new Error("enter a valid email and mobile number");
 	
 		let duplicateemail = await Vendor.findOne({ email: email});
 		let phonenumber = await Vendor.findOne({ mobile: mobile });
@@ -106,6 +106,5 @@ router.post("/add", upload.single("profile_img"), configcloud, signaccesstoken, 
 	} catch (error) {
 		next(error);
 	}
-});  	
-
+});
 module.exports = router;
